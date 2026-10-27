@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ScriptBox — Require Script Search</title>
+<style>
+:root{--bg:#0f1117;--sf:#181b24;--bd:#272b38;--tx:#e8eaf2;--mu:#8b91a5;--ac:#6c5ce7;--ac2:#00cec9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f5fa;--sf:#fff;--bd:#dfe2ee;--tx:#1b1e2b;--mu:#667;--ac:#5a4bd6;--ac2:#00a8a3;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f4f5fa;--sf:#fff;--bd:#dfe2ee;--tx:#1b1e2b;--mu:#667;--ac:#5a4bd6;--ac2:#00a8a3;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+header{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--bd);background:var(--sf);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.logo{font-weight:800;font-size:20px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer}
+nav{display:flex;gap:6px}
+nav button{background:none;border:0;color:var(--mu);font:inherit;padding:6px 12px;border-radius:8px;cursor:pointer}
+nav button.on,nav button:hover{color:var(--tx);background:var(--bg)}
+main{max-width:1000px;margin:0 auto;padding:20px}
+.hero{text-align:center;padding:44px 0 24px}
+.hero h1{font-size:clamp(28px,6vw,44px);margin:0 0 8px}
+.hero p{color:var(--mu);margin:0 auto 22px;max-width:520px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+input{background:var(--sf);border:1px solid var(--bd);color:var(--tx);font:inherit;padding:11px 14px;border-radius:10px;outline:none;min-width:0}
+input:focus{border-color:var(--ac)}
+#q{flex:1 1 260px}#u{flex:0 1 220px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1px solid var(--bd);background:var(--sf);color:var(--mu);padding:5px 13px;border-radius:99px;cursor:pointer;font-size:14px}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:16px}
+.tag{font-size:12px;color:var(--ac2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.note{font-size:13px;color:var(--mu)}
+code{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:12px;word-break:break-all;display:block}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:9px;padding:8px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ok{background:var(--ac2)}
+h2{margin:30px 0 12px;font-size:20px}
+.empty{color:var(--mu);text-align:center;padding:40px}
+footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 20px}
+.star{float:right;background:none;border:0;color:var(--mu);cursor:pointer;font-size:18px;line-height:1}.star.on{color:#f5b301}.new{background:var(--ac2);color:#fff;border-radius:6px;padding:0 6px;font-size:10px;margin-left:6px}textarea{width:100%;min-height:130px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);border-radius:10px;padding:10px;font:12px monospace;margin:10px 0}select{background:var(--sf);border:1px solid var(--bd);color:var(--tx);font:inherit;padding:11px 10px;border-radius:10px}.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{padding:8px 16px}#more{display:block;margin:16px auto;padding:10px 26px}
+.hide,#more.hide{display:none}
+.locked header,.locked main,.locked footer{display:none}
+#gate,#tosm{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(70% 70% at 50% 0%,color-mix(in srgb,var(--ac) 35%,var(--bg)),var(--bg));overflow:auto}
+#tosm{z-index:60;background:rgba(0,0,0,.65)}#gate.hide,#tosm.hide{display:none}
+.gcard{background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:24px;width:min(400px,100%);display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:pop .4s cubic-bezier(.2,.9,.3,1.2) both}
+.gcard h2{margin:0}.gerr{color:#e5484d;font-size:14px;min-height:18px}#tk{padding:0;margin-right:6px}
+.lnk{background:none;border:0;color:var(--ac2);cursor:pointer;font:inherit;padding:0;text-decoration:underline}
+.grow{flex:1}.pill{background:var(--bg);border:1px solid var(--bd);color:var(--tx);border-radius:99px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.pill.dot{color:var(--ac2);border-color:var(--ac2);cursor:default;animation:glow 2s infinite}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ac);color:#fff;padding:11px 18px;border-radius:12px;z-index:70;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:90vw;box-shadow:0 10px 30px rgba(0,0,0,.35)}#toast.on{transform:translate(-50%,0)}
+@keyframes pop{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ac2) 50%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes drift{0%,100%{background-position:0 0}50%{background-position:40px 20px}}
+.grid.anim>.card{animation:up .45s ease both}.logo{transition:transform .2s}.logo:hover{transform:scale(1.05)}
+.card{box-shadow:0 1px 0 rgba(255,255,255,.03),0 8px 24px rgba(0,0,0,.12)}.btn{transition:transform .1s,filter .15s}.btn:hover{filter:brightness(1.12)}.btn:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+header{backdrop-filter:blur(12px)}
+.hero{background:radial-gradient(60% 90% at 50% 0%,color-mix(in srgb,var(--ac) 26%,transparent),transparent);border-radius:20px}
+.card{transition:transform .15s,border-color .15s}.card:hover{transform:translateY(-2px);border-color:var(--ac)}
+.stats{display:flex;justify-content:center;gap:34px;color:var(--mu);font-size:14px}.stats b{display:block;font-size:24px;color:var(--tx)}
+.fi{border-left:4px solid var(--bd);background:var(--bg);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:14px}.fi.hi{border-color:#e5484d}.fi.me{border-color:#f5a524}.fi.ok{border-color:#30a46c}
+.chip{transition:background .15s;white-space:nowrap}.chip:hover{border-color:var(--ac)}
+.btn{min-height:42px;-webkit-tap-highlight-color:transparent}.star{min-width:40px;min-height:40px}code{user-select:all;-webkit-user-select:all}
+body{-webkit-text-size-adjust:100%;overflow-x:hidden}
+@media (max-width:640px){header{flex-wrap:wrap;gap:6px 12px;padding:10px 14px}main{padding:14px}.hero{padding:28px 8px 18px}.bar{gap:6px}#u,#sort{flex:1 1 44%}.chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}.grid{grid-template-columns:1fr}.stats{gap:22px}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo" onclick="go('home')">ScriptBox</span>
+  <nav><button id="n-home" class="on" onclick="go('home')">Home</button><button id="n-all" onclick="go('all')">All scripts</button></nav><span class="grow"></span><span id="online" class="pill dot hide"></span><span id="mepill" class="pill hide"></span><button class="pill" onclick="logout()">Log out</button>
+</header>
+<div id="gate"><div class="gcard"><div class="logo" style="font-size:26px">ScriptBox</div><h2 id="gt">Welcome back</h2><span class="note" id="gs">Log in to open ScriptBox.</span><input id="em" type="email" placeholder="Email" autocomplete="email"><input id="pw" type="password" placeholder="Password" autocomplete="current-password"><label id="tl" class="note hide"><input type="checkbox" id="tk"> I agree to the <button class="lnk" onclick="tos(1)">Terms of Service</button></label><div id="ge" class="gerr"></div><button class="btn" id="gb" onclick="authGo()">Log in</button><span class="note"><span id="sq">No account?</span> <button class="lnk" id="sw" onclick="swMode()">Sign up</button></span></div></div>
+<div id="tosm" class="hide"><div class="gcard" style="max-height:80vh;overflow:auto"><h2>Terms of Service</h2><ol class="note" style="padding-left:18px;line-height:1.7"><li>Use scripts only in places you own or have permission to test in.</li><li>No harassment, griefing, hate speech or attacks on other people’s games.</li><li>The catalog is community-sourced and not guaranteed safe. You use it at your own risk.</li><li>Accounts are stored on your own device. Don’t reuse an important password.</li><li>You must be old enough to use Roblox in your region.</li><li>Entries may be removed or changed at any time.</li></ol><button class="btn" onclick="tos(0)">Close</button></div></div>
+<div id="toast"></div>
+<main>
+  <section id="home">
+    <div class="hero">
+      <h1>Find your next require script</h1>
+      <p>Search morphs, admin panels, maps, tools and more. Set your username once and every script is ready to copy.</p>
+      <div class="stats"><div><b id="cnt">0</b>scripts</div><div><b id="ncat">0</b>categories</div></div>
+    </div>
+  </section>
+  <div class="bar" id="bar">
+    <input id="q" type="search" placeholder="Search scripts, e.g. morph, admin, dex…">
+    <input id="u" placeholder="Your username" value="kentyaplurzano12050"><select id="sort"><option value="def">Default</option><option value="az">A–Z</option><option value="new">Newest</option></select>
+  </div>
+  
+  <div id="pub" class="card hide" style="margin-bottom:14px"><h3>Publish a verified script</h3><span class="note">Only editors see this. Everyone who has the page open gets it instantly.</span><div class="row"><input id="pt" placeholder="Title" style="flex:1 1 160px"><input id="pk" placeholder="Category" style="flex:1 1 120px"></div><input id="pc" placeholder='require(123456)("{u}")'><button class="btn" onclick="pubGo()">Publish verified</button></div>
+  <div class="chips" id="chips"></div>
+  <div id="featured-wrap"><h2>Featured</h2><div class="grid" id="featured"></div></div>
+  <h2 id="all-title">All scripts</h2>
+  <div class="grid" id="list"></div>
+  <button class="btn hide" id="more" onclick="LIM+=48;render()">Load more</button>
+  <div class="empty hide" id="empty">No scripts match that search.</div>
+</main>
+<footer>ScriptBox works on phones, tablets and desktop. Scripts are community-submitted and not verified, so only use them in places you own or have permission to test in. <button class="lnk" onclick="tos(1)">Terms of Service</button></footer>
+<script>
+// [code with {u} placeholder, title, category]
+var S=[
+['require(135231466738957):Hload("{u}")','H Loader','Featured'],
+['require(0x342D5F0DA)("{u}")','TOPK3K 3.5.0','Admin'],
+['require(73610662913659)("{u}")','Hide Players','Tools'],
+['require(125992639027440)["Require.EXE by E God"]("{u}")','Require.EXE v2','Tools'],
+['require(15591025510)()','Neb’s Anti Abuse','Protection'],
+['require(18660367646)()','Anti Skid Advance / Skid Shield','Protection'],
+['require(10304477576).AntiSkid()','Anti Skid','Protection'],
+['require(6569726017)["{u}"] = "Dark";','Better Boombox','Tools'],
+['require(76256541704238).BubbleChat("{u}")','Bubble Chat (unfiltered)','Tools'],
+['require(77579329778474).catlol("{u}")','Catlol','Tools'],
+['require(92120285948623):default()','Condo Map','Maps'],
+['require(73888902428931).load("{u}")','2x4x8x64 Morph','Morphs'],
+['require(90079465185110).load("{u}")','Monster Morph — Demogorgon','Morphs'],
+['require(129709299749559).load("{u}")','Sans Character Morph','Morphs'],
+['require(125375466492613).MorphMonster("{u}", "freddy kruegar")','Freddy Krueger Morph','Morphs'],
+['require(88521859208314).MorphMonster("{u}", "death angel")','Death Angel Morph','Morphs'],
+['require(74432860446268).bluudude("{u}")','Blue Dude (Forsaken)','Morphs'],
+['require(77055143496081).MorphMonster("{u}", "sonic.eyx")','Sonic.EXE Morph','Morphs'],
+['require(12102103065).Patrick("{u}")','Patrick Meme Song','Fun'],
+['require(2985101287).load("{u}")','Troll Face','Fun'],
+['require(2985155579).load("{u}")','Gaster','Characters'],
+['require(2985153317).load("{u}")','Anime Super Powers','Characters'],
+['require(2985164979).load("{u}")','Soul Reaper','Characters'],
+['require(2985184326).load("{u}")','Sword Master','Weapons'],
+['require(2987299148).load("{u}")','Thunder Gun','Weapons'],
+['require(2987312314).load("{u}")','Sniper','Weapons'],
+['require(2987331232).load("{u}")','Blue Sword','Weapons'],
+['require(3021451890).load("{u}")','Red Hot Banisher','Characters'],
+['require(3148313559).load("{u}")','Codex Fighter','Characters'],
+['require(3020974806).load("{u}")','Guardian of Light','Characters'],
+['require(3043766339).load("{u}")','Teardrop Guns','Weapons'],
+['require(2993514878):Fire("{u}")','UTG','Admin'],
+['require(2513069802).admin("{u}")','Kuro Admin','Admin'],
+['require(4985918954)("{u}")','Infinite Yield (exploit version)','Admin'],
+['require(4989590441)("{u}")','Infinite Yield Convert','Admin'],
+['require(5041942583)("{u}")','IY FE Admin 3.5.1','Admin'],
+['require(5053095577)("{u}")','Cmd-X Bar Admin 1.16.0','Admin'],
+['require(5007571660).reviz("{u}")','Reviz Admin','Admin'],
+['require(5035957523)("{u}")','Shattervast Admin','Admin'],
+['require(5016573984)("{u}")','Dex FE','Tools'],
+['require(4931764547)("{u}")','Dex v4','Tools'],
+['require(14572394952)("{u}")','Dex','Tools'],
+['require(4981146137)("{u}")','Executor (say /exe your username)','Tools'],
+['require(4935835439)("{u}","host")','Script Logger','Tools'],
+['require(4988855263)("{u}")','Script Logger v2 Remake','Tools'],
+['require(4869378421).F3X("{u}")','F3X BTools','Tools'],
+['require(4949149864)("{u}")','Iron Man Suit','Characters'],
+['require(4638648334).siren("{u}")','Siren Head','Characters'],
+['require(5084965407).sans("{u}")','Sans Script','Characters'],
+['require(5009954677).map("{u}")','War Map','Maps'],
+['require(4943872539).map("{u}")','House Map','Maps'],
+['require(4081020916).loadmap()','Tanitive Space Map','Maps'],
+['require(4081024299).loadmap()','Dungeon Map','Maps'],
+['require(5066924699)("{u}")','VR Script (FE)','Fun'],
+['require(5078318191).wth("{u}")','Computer','Fun'],
+['require(5084810261)("{u}")','PC (update songs)','Fun'],
+['require(5023518530).load("{u}")','Grab Knife v4 (press P)','Weapons'],
+['require(4922496226).Dreamer("{u}")','Gun Pack','Weapons'],
+['require(4559973214).load("{u}")','Combat Hand','Weapons'],
+['require(3093543204).load("{u}")','Rainbow Gun','Weapons'],
+['require(4697572245).load("{u}")','Car','Fun'],
+['require(4564212681).ucbc("{u}")','Bubble Chat (no tags)','Tools'],
+['require(4926735627).load("{u}")','Pumpkin Man','Characters'],
+['require(4450253916).load("{u}")','Bat','Characters'],
+['require(6339079111).mobspawner("{u}")','Minecraft Mobs Spawner','Fun'],
+['require(7507987223)("{u}","Guns")','Guns Pack','Weapons'],
+['require(6795333966).enableWeapons("{u}")','Enable Weapons','Weapons'],
+['require(0xA8526D5D).giveGuns\'{u}\'','Phantom Forces Guns','Weapons'],
+['require(7203746402).tonk("{u}")','Tank AI','AI'],
+['require(7215403029).RRT("{u}")','Special Forces AI','AI'],
+['require(7185228601).load("{u}")','Helicopter AI','AI'],
+['require(7163976217).VK("{u}")','Police AI','AI'],
+['require(7486656912).Juggernaut("{u}")','Juggernaut AI','AI'],
+['require(0x1767bf813)("{u}")','C4 Weapon','Weapons'],
+['require(5621190626).OmegaFlower("{u}")','Omega Flowey','Bosses'],
+['require(4106669917).load("{u}")','Chara Boss','Bosses'],
+['require(5619264516).Dark("{u}")','Vaxtemi Boss Battle','Bosses'],
+['require(6175490752).load("{u}")','Void Boss','Bosses'],
+['require(6472943749).boss("{u}")','Bloxwatch','Bosses'],
+['require(4581300009).xd("{u}")','Road Roller Da','Characters'],
+['require(6099373575).load("{u}")','Ravenger Claws V2 (Q, E, R, Y)','Characters'],
+['require(6222361140).load("{u}")','Shadow Gunner (T, Z, X)','Characters'],
+['require(6027795939).load("{u}")','Cyber Monarch','Characters'],
+['require(6099324864).load("{u}")','Kuma (Q, E)','Characters'],
+['require(4471066396).load("{u}")','Bad Karma','Characters'],
+['require(6099241563).load("{u}")','Xester V2','Characters'],
+['require(6099316092).load("{u}")','Veltex (Q, E, T, F, J)','Characters'],
+['require(6058159336).load("{u}")','Shadow Kars','Characters'],
+['require(6168743245).load("{u}")','The Defiant','Characters'],
+['require(6099363076).load("{u}")','The Disturbed (Q, E, Y, F)','Characters'],
+['require(6042859321).load("{u}")','Jester (T, Z, X, V)','Characters'],
+['require(6058166660).load("{u}")','Dimensiona','Characters'],
+['require(3224070083).load("{u}")','Nectula','Characters'],
+['require(6088494183).load("{u}")','Desolate (R, F, M)','Characters'],
+['require(6015747481).load("{u}")','Brick Hamman','Characters'],
+['require(6056559552).load("{u}")','Death Sheriff','Characters'],
+['require(5813743814).load("{u}")','Stick Beater (Z, X, C)','Characters'],
+['require(5977500481).load("{u}")','Project Light','Characters'],
+['require(5813695241).load("{u}")','Oculus (Z, X, C, V, M)','Characters'],
+['require(5617200606).Cyber("{u}")','Cyber Knight','Characters'],
+['require(5390158029).Dark("{u}")','Lost Soul','Characters'],
+['require(5857033951).load("{u}")','Achromatic','Characters'],
+['require(5813836873).load("{u}")','Archangel of Light (Z, X, C)','Characters'],
+['require(5813799887).load("{u}")','Aureola','Characters'],
+['require(4611999946).load("{u}")','Sociopath','Characters'],
+['require(4490557105).load("{u}")','Fallen Anger','Characters'],
+['require(4661847142).load("{u}")','Chronos Sentinel','Characters'],
+['require(5375460203).Player("{u}")','Glorious Bastion of Light','Characters'],
+['require(5374597845).Dark("{u}")','Echo','Characters'],
+['require(5346891374).Dark("{u}")','Darkomos','Characters'],
+['require(5270525643).Dark("{u}")','Stan (E, Q)','Characters'],
+['require(4943481014).Nightmare("{u}")','Nightmare (Q, Z, M)','Characters'],
+['require(3256686965).load("{u}")','Dominus Venari','Characters'],
+['require(6464428559).load("{u}")','Dominus Astra','Characters'],
+['require(6419718698).load("{u}")','The Holiest Wrench','Characters'],
+['require(6438196691)("{u}","JUNKBOT")','Junkbot','Characters'],
+['require(5813748809).load("{u}")','Light Circlet','Characters'],
+['require(6424791174).load("{u}")','Gattai Zamasu (E, R, T, Y, U)','Characters'],
+['require(6540522165).load("{u}")','Omni God','Characters'],
+['require(6688474792).load("{u}")','Killbot V3','Characters'],
+['require(7437496726).load("{u}")','Lucyanna Angel','Characters'],
+['require(7414960182).load("{u}")','The Dark Entity','Characters'],
+['require(3957090799).load("{u}")','Godspeed','Characters'],
+['require(4483948796).load("{u}")','Pyro Flamethrower','Weapons'],
+['require(6027832941).load("{u}")','Holy Hand Grenade','Weapons'],
+['require(5068511197).insert("{u}")','Military Tank','AI'],
+['require(6788546558)("{u}")','Studio Dummy V3','AI'],
+['require(7091286913)("{u}")','Newest Maddox Dummy','AI'],
+['require(6568426115)("{u}")','Rapid Fire Studio Dummy','AI'],
+['require(6285853184).TimeStopper("{u}","rbc")','Time Stop','Fun'],
+['require(6525681614).reverser("{u}")','Reverse Time','Fun'],
+['require(7411835387)("{u}")','The Time Machine','Fun'],
+['require(6085762856).BINGBONG("NoNameNeeded")','Crab Rave','Fun'],
+['require(4919507929).call("{u}")','Creeper Call','Fun'],
+['require(4927690808).call("{u}")','Unknown Caller Call','Fun'],
+['require(7001260635).lctoolsreuploaded("{u}")','LC Tools Pack','Tools'],
+['require(6727030812).Fun("{u}","Fun")','Tools Pack','Tools'],
+['require(7518778955).ConstraintTools("{u}")','Constraint Tools','Tools'],
+['require(6234345495):Tesla("{u}")','Tesla Executor','Tools'],
+['require(5013851171)("{u}")','Synapse Remake','Tools'],
+['require(5013480517).chonky("{u}")','My Dark Shadow SS Executor','Tools'],
+['require(4982992957):Fire("{u}")','Sigma Executor','Tools'],
+['require(5042065179)("{u}")','Katie’s FE Admin','Admin'],
+['require(5053208859)("{u}")','IY FE 3.7.1','Admin'],
+['require(4900073415).MML("{u}")','MML Admin (fixed)','Admin'],
+['require(5099140412).Aqua("{u}")','Aqua Hub','Hubs'],
+['require(4937114966):SH("{u}")','Sakura Hub','Hubs'],
+['require(5543125369).eliza("{u}")','Eliza Hub','Hubs'],
+['require(5673170715).Leak("{u}")','Undetected Hub V2','Hubs'],
+['require(4831353616).xh("{u}")','Xio’s Hub','Hubs'],
+['require(5000363317).UwUMoment("{u}")','Kasper Hub (38 pages)','Hubs'],
+['require(5845339294).EH("{u}")','Ethereal Hub','Hubs'],
+['require(6794297504).NekoHub("{u}")','Neko Hub','Hubs'],
+['require(6530368992).antilgr()','Anti ScriptLogger / WebhookLogger','Protection'],
+['require(7819171999).antilgr()','Anti Logger V10','Protection'],
+['require(6735691273).BetaAntiSkid()','Antiskid V10','Protection'],
+['require(7276744247):noskids("{u}")','Logger Detector','Protection'],
+['150402649','Scary Ambient Music','Audio'],
+['6729922069','Metal Pipe','Audio'],
+['4809574295','Fart','Audio'],
+['35935204','Evil Laugh (pitch 0.9 for scary)','Audio'],
+['130759239','Shedletsky Laugh','Audio'],
+['144507765','Boom (explosion)','Audio'],
+['6151553097','MLG Remix','Audio'],
+['8581546179','Amen Break (120–150 BPM)','Audio'],
+['5143383166','OOF','Audio'],
+['8389041427','Trollface Song','Audio'],
+['4814018992','Discord Ringtone','Audio'],
+['5596154573','Henry Stickmin Distraction Theme','Audio'],
+['840080899','I Am The One','Audio'],
+['4425539165','Tails Doll Laugh','Audio'],
+['require(4722218391).load("{u}")','Infinite Glitcher','Glitchers'],
+['require(4722146433).load("{u}")','Interstekkar Glitcher','Glitchers'],
+['require(4721766508):GalaxyGlitcher("{u}")','Cytus Glitcher','Glitchers'],
+['require(4178465932).MPG("{u}")','Pixel Glitcher','Glitchers'],
+['require(4721735759).load("{u}")','Spectrum Glitcher','Glitchers'],
+['require(2844773931).load("{u}")','Spectrum Glitcher (working)','Glitchers'],
+['require(4721760220):yes("{u}")','AOM Glitcher Edit','Glitchers'],
+['require(4721789462).noxd("{u}")','Reality Glitcher','Glitchers'],
+['require(4809720017).load("{u}")','Axiom Glitcher','Glitchers'],
+['require(2560732565).ethe("{u}")','Ethernal Glitcher Rewrited','Glitchers'],
+['require(6216675632).ae("{u}")','Snake Glitcher','Glitchers'],
+['require(4675430277).Lmao("{u}")','UTG v3','Hubs'],
+['require(4588615641):Fire("{u}")','Island Life UTG','Hubs'],
+['require(4679893299):Fire("{u}")','Aureus Hub','Hubs'],
+['require(4721164458).copy("{u}")','Many GUI','Hubs'],
+['require(4649145907).oCAG("{u}")','Bean GUI','Hubs'],
+['require(4748605382).new("{u}")','Ruby UTG','Hubs'],
+['require(4744981474).adrian("{u}")','Adrian GUI','Hubs'],
+['require(4154130567).ik("{u}")','Adrian’s UTG','Hubs'],
+['require(4937823608).load("{u}")','UTG Classic','Hubs'],
+['require(4614455084).Under("{u}")','Under UTG','Hubs'],
+['require(6218862474).eliza("{u}")','UTG V10','Hubs'],
+['require(4829576129).SpringHub("{u}")','Spring Hub','Hubs'],
+['require(4838360731).RainbowHub("{u}")','Rainbow Hub','Hubs'],
+['require(4828418260).usg("{u}")','USG','Hubs'],
+['require(4834931816).Rose("{u}")','Rose Hub','Hubs'],
+['require(4634558715)("{u}")','Best Hub','Hubs'],
+['require(4932468518).Boss("{u}")','Boss Hub','Hubs'],
+['require(5028947792).Lmao("{u}")','Hoarder GUI','Hubs'],
+['require(5702333343).load("{u}")','Roz Hub','Hubs'],
+['require(5128274968).GetAntsUtgV5("{u}")','Ants Hub V5','Hubs'],
+['require(5300095496).soap("{u}")','Soap Hub','Hubs'],
+['require(5203976741).spong("{u}")','Spong Hub','Hubs'],
+['require(5116049830).thonk("{u}")','Thonk Hub','Hubs'],
+['require(5253172143).load("{u}")','Forest Hub','Hubs'],
+['require(5885462965).lexa("{u}")','L3xa Hub','Hubs'],
+['require(5716300544).asd("{u}")','Kasper’s Hub','Hubs'],
+['require(5133347890).scrambles("{u}")','Scrambles Hub','Hubs'],
+['require(6239870794):NB2("{u}")','NB Hub V2','Hubs'],
+['require(5487274946).GLITCHED("{u}")','Glitchhub Premium','Hubs'],
+['require(5352721272):Fire("{u}")','Sonichub','Hubs'],
+['require(5121570975).SpaghettiHub("{u}")','Spaghetti Hub','Hubs'],
+['require(5580599015).load("{u}")','Avry Hub','Hubs'],
+['require(5308680571).load("{u}")','GUI Hub','Hubs'],
+['require(5275752166).ULTRAV2("{u}")','Ultra Hub','Hubs'],
+['require(5344766102).fare("{u}")','Fare’s Hubhub','Hubs'],
+['require(5178605206).bizzcrack("{u}")','Xio Hax','Hubs'],
+['require(7242662591):SGH_3("{u}")','Sans_Gboard’s Hub','Hubs'],
+['require(5492934148):Fire("XD","{u}")','Mr Bean Admin','Admin'],
+['require(2833959389).load"{u}"','Bible’s Admin','Admin'],
+['require(13929311424)("{u}")','Rocky2u’s Admin 1.8.0','Admin'],
+['require(15987829426)("{u}")','Nexus Hub','Hubs'],
+['require(17181088766)("{u}")','Primadon','Hubs'],
+['require(15629007042)("{u}")','Sheldoni','Hubs'],
+['require(13904101403).RAroblox("{u}")','Cart Ride','Fun'],
+['require(17245199712)("{u}")','Dex Explorer Agent','Tools'],
+['require(7274736492)("{u}")','Mystic','Hubs'],
+['require(16920033857)("{u}")','SSP','Hubs'],
+['require(106633341737043)("{u}")','Obunga','Characters'],
+['require(17472456139).fehax("{u}")','Fehax','Tools'],
+['require(17181192900)("{u}")','Knife Murderer','Weapons'],
+['require(115065639729634)("{u}")','Logo','Fun'],
+['require(15680206962).rust("{u}")','Rust','Fun'],
+['require(12350030542).RC7("{u}")','RC7','Tools'],
+['require(4902600443)("Stand Name","{u}")','Jojo Stands','Characters'],
+['require(3563652201).l0l("UltraWasHere")("{u}")','Plane','Fun'],
+['require(4559977647).load("{u}")','Baseball Bat V5','Weapons'],
+['require(3024043748):Start("{u}","AAA")','Gear Stuff','Weapons'],
+['require(3032735551):Start("{u}","AAA")','Calamity','Characters'],
+['require(5146659840).Dark_Eccentric("Dark_Eccentric","{u}")','Grab Gun','Weapons'],
+['require(7452827346):NEFFEXV2("{u}")','Neffex V2','Characters'],
+['require(7691779364).hi("{u}")','Hallowed','Characters'],
+['require(7185139799).bal("{u}")','Maddox Ball','Fun'],
+['require(4995733439).ok("{u}")','Sinner','Characters'],
+['require(4982745702).load("{u}")','Hackerman','Characters'],
+['require(4935275557):Subaru112("{u}","Subaru112’s SCP-106")','SCP-106','Characters'],
+['require(4961517054).AUDarkMan("{u}")','Creepy Dark Man','Characters'],
+['require(4806738121).load("{u}")','Billie Eilish','Characters'],
+['require(4469835482).load("{u}")','Hype Unleashed','Characters'],
+['require(4535915053).load("{u}")','Blight','Characters'],
+['require(2974908082).load("{u}")','Syrite Vanos','Characters'],
+['require(2920382269).load"{u}"','Winged Shot','Weapons'],
+['require(2552620429).load"{u}"','UFO Reap','Characters'],
+['require(6824699886)("{u}")','Studio Dummy V3 Switcher','AI'],
+['require(6885716335)("{u}")','Studio Dummy V2','AI'],
+['require(7023682644)("{u}")','IL Dummy','AI'],
+['require(7253448613)("{u}")','Studio Immortality Lord V2','Characters'],
+['require(7037589092)("{u}")','Weird Lord','Characters'],
+['require(7242244455)("{u}")','Immortality Lord XTR','Characters'],
+['require(7322088685)("{u}")','Immortality Demon','Characters'],
+['require(7064628940).TLX("{u}")','Tiger’s Lamborghini Type-X','Fun'],
+['require(0x20c40e721):NekoHub("{u}")','Neko Hub 2','Hubs'],
+['require(7594500378)("{u}")','Nightmare (2)','Characters'],
+['require(7593715162).load("{u}")','Calamity V3 Hub','Hubs'],
+['require(7584808965).ImmortalityLord("{u}")','Incubus (Neko Edit)','Characters'],
+['require(7475656586).bscr("{u}")','Project Godcat','Characters'],
+['require(7485376670).trussboy("{u}")','The Ascensionist','Characters'],
+['require(8065511782)("{u}")','Descensionist','Characters'],
+['require(6710125107).mlem("{u}")','Mlem’s SS Gui V3','Hubs'],
+['require(6655953122).HopeV2iguess("{u}")','Hope V2','Characters'],
+['require(6270014162).load("{u}")','Universalis Dominus','Characters'],
+['require(6269838898).load("{u}")','Operation Noob','Fun'],
+['require(6171421519)("{u}")','Epic Godcat Edit','Characters'],
+['require(6274987259).v2("{u}")','Project Scripted V2','Hubs'],
+['require(5994869968).D0ggo("{u}")','Lucky’s Hub','Hubs'],
+['require(4496865792).Lmao("{u}")','Ultimate Trolling Gui YT Edition','Hubs'],
+['require(6032524768).Eagle("{u}")','C00lgui Reborn','Hubs'],
+['require(4820579551).execute("{u}")','Pandora Edit','Hubs'],
+['require(5046040444).swg("{u}")','Pandora Edit 2','Hubs'],
+['require(5034485916).Autopt3("{u}")','Rainbow King','Characters'],
+['require(5080923540).AUXD("{u}")','Rainbow King Rework','Characters'],
+['require(5065245114).Mad1("{u}")','Mad Gun','Weapons'],
+['require(5053600270)("{u}")','Hypertotal GUI','Hubs'],
+['require(4956167032).load("{u}")','Opfinalty GUI','Hubs'],
+['require(5056875990)("{u}")','Opfinalty GUI (better)','Hubs'],
+['require(4956213675).load("{u}")','Money GUI','Hubs'],
+['require(5038036697)("{u}")','Cmd-X Bar 1.14.0','Admin'],
+['require(5041886633)("{u}")','IY FE Admin 2.1','Admin'],
+['require(5042812997).load("{u}")','IY FE Discontinued 9.5.3','Admin'],
+['require(5056871515).load("{u}")','IY 9.5.3 Convert','Admin'],
+['require(5032552965)("{u}")','IY FE (half broken)','Admin'],
+['require(5082247692)("{u}")','Laptop Remake','Fun'],
+['require(5083134281)("{u}")','Roblox Windows 10 PC','Fun'],
+['require(4962812209).load("{u}")','Hub Parody','Hubs'],
+['require(4945273678).load("{u}")','Snake Oof','Fun'],
+['require(4962917154).UwU("{u}")','Kasper’s UTG','Hubs'],
+['require(4961201586):Haii("{u}")','Epic Kasper Hub','Hubs'],
+['require(7260532691)("{u}")','Huge Lord','Characters'],
+['require(5610305900)("{u}")','TOPKEK V5','Hubs'],
+['require(4874364435)("{u}")','TOPKEK V4','Hubs'],
+['require(5564800243).fehax("{u}")','Chathax','Tools'],
+['require(5903403087).load("{u}")','Imposter Chat','Fun'],
+['require(5617600468).load("{u}")','Neurotic','Characters'],
+['require(1192815372).load"{u}"','Random Map','Maps'],
+['require(4564681456).catgirl("{u}")','Catgirl','Fun'],
+['require(5516943300).Leak("{u}")','Undetected Hub V2 (alt)','Hubs'],
+['require(4934614538):adrian("{u}")','Adrian’s Good UTG','Hubs'],
+['require(4977590940).load("{u}")','Baldi Invasion UTG','Hubs'],
+['require(5868025435).load("{u}")','D3S SS','Hubs'],
+['require(5356256564).SubscribeYouSkid("{u}")','Subhub','Hubs'],
+['require(5419240318).PraiseSkidGod("{u}")','Hexine GUI','Hubs'],
+['require(4706570992).load("{u}")','Unleaked SS','Hubs'],
+['require(5620645578):ASH("{u}")','Adrian Hub','Hubs'],
+['require(5126648745).load("{u}")','Anonymous UTG','Hubs'],
+['require(3497222070).load("{u}")','UTG Edit','Hubs'],
+['require(4952179933).Fraud("{u}")','Fraud','Hubs'],
+['require(3010581956):Fireplace("{u}")','Dark Dex','Tools'],
+['require(4992512410):Asylumgotskidded("{u}")','Asylum Hub','Hubs'],
+['require(6114289913).c00lgui("{u}")','c00lgui Remake','Hubs'],
+['require(5146396793).load("{u}")','GodSpawn GUI','Hubs'],
+['require(6097532439):redlightsdontleak("{u}")','Redlights.exe','Characters'],
+['require(6564964464)("{u}")','Moriyan Drone (Z, M)','AI'],
+['require(6931315732).yeah("{u}")','AndrFix Godcat Edit','Characters'],
+['require(6608656220):John("{u}")','New John Doe','Characters'],
+['require(7265631746):SGHR("{u}")','Sans_Gboard Hub Remake','Hubs'],
+['require(7103633176)("{u}")','Random Tool Pack','Tools'],
+['require(7701211784).rar("{u}")','Another Toolpack','Tools'],
+['require(7580799842).NONAME("{u}")','Viewport Bloodwater','Characters'],
+['require(7664181817)("{u}")','Bloodwater Edit','Characters'],
+['require(7703246385).NONAME("{u}")','New Viewport Bloodwater','Characters'],
+['require(6740182305):myfirstscriptthatcankilllol("{u}")','OP Tool Pack','Tools'],
+['require(6953710832):ToolPack_Gui_by_Sans_Gboard("{u}")','Tool Pack GUI','Tools'],
+['require(4767686662).Lmao("{u}")','Lmao GUI','Hubs'],
+['require(4922204781).WOW("{u}")','WOW GUI (converted)','Hubs'],
+['require(4857508756).noblgui("{u}")','Non-Blacklist GUI','Hubs'],
+['require(4777482244).vanity("{u}")','Vanity SS','Hubs'],
+['require(4851033180)("{u}")','Infinite Yield SS 2D','Admin'],
+['require(4768975580)("{u}")','Infinite Yield SS Beta','Admin'],
+['require(4848156552)("{u}")','Infinite Yield SS Edit','Admin'],
+['require(4828652003).Glitch("{u}")','Glitch GUI','Glitchers'],
+['require(5010395227).load("{u}")','TOPK3K v5','Hubs'],
+['require(5037357897)("{u}")','My Dark Shadow SS Latest','Hubs'],
+['require(5055418779).Psygen("{u}")','Psygen','Hubs'],
+['require(3269293954).load("{u}")','Earth Worm Sally','Characters'],
+['require(2943439057):Fire("{u}","hack")','Play Time','Fun'],
+['require(3183163217):Fire("{u}")','Farth’s GUI','Hubs'],
+['require(3074454555).mbye("{u}")','Mr Bye Bye (purple)','Hubs'],
+['require(2658847146).load"{u}"','Chara','Characters'],
+['require(2658905537).load"{u}"','God','Characters'],
+['require(03021080013).load("{u}")','Fallen God’s Daughter','Characters'],
+['require(2609384717).load("{u}")','TOPK3K 3.0','Hubs'],
+['require(4932477844):SnakeVenom("{u}")','Snake Venom','Hubs'],
+['require(5071692296).load("{u}")','Ants UTG v2','Hubs'],
+['require(5963380437).publicbuild("{u}","Retro")','Retro Hub','Hubs'],
+['require(6009547419).Fire("{u}")','Vascepa Hub','Hubs'],
+['require(6123029966).vian("{u}")','Viankos (F, Z, X, C)','Characters'],
+['require(4665394711).load("{u}")','Server Admin','Admin'],
+['require(5142574517):mega("{u}")','Adrian’s MTG','Hubs'],
+['require(4869013426).JuanaSS("{u}")','JuanSS','Hubs'],
+['require(4555115496).gw("{u}")','Trollimbius GUI','Hubs'],
+['6150301276','Joke Loop','Audio'],
+['1837285027','Black Metal Theme','Audio'],
+['165487479','Muahahaha Laugh','Audio'],
+['11944350','Pew (Roblox gear)','Audio'],
+['18716629','Old Roblox Building Server Sound','Audio'],
+['955931351','OOF Reversed','Audio'],
+['290257075','Hey Give Me The Hotdog','Audio'],
+['7153945201','MeepCity Entrance Sound','Audio'],
+['170755561','HL2 Stalker Scream','Audio'],
+['1838706740','g00byd0lan Place Music','Audio'],
+['237866621','MML Admin: You Are An Admin','Audio'],
+['237866523','MML Admin: You Are A Member','Audio'],
+['237866707','MML Admin: You Are An Owner','Audio'],
+['1836362602','Goofy Theme','Audio'],
+['928990573','Insta-kill Ability Sound','Audio'],
+['5032588119','Cmd-X Loaded','Audio'],
+['30646260','HUUYAA','Audio'],
+['19094700','Snowglobe','Audio'],
+['19286245','Snowglobe 2','Audio'],
+['847061203','Mode Switch Sound','Audio'],
+['534859368','Special Mode Sound','Audio'],
+['525200869','Message Sound','Audio'],
+['824687369','Chaos Mode Stomp','Audio'],
+['1839246711','Jumpstyle','Audio'],
+['468911141','Atrocity','Audio'],
+['6823597327','Radio 2','Audio']
+];
+var cat='All',cur='home',FAV={},LIM=48,CUS=[];
+try{FAV=JSON.parse(localStorage.getItem('sb_fav')||'{}')||{}}catch(e){}
+function saveS(){try{localStorage.setItem('sb_fav',JSON.stringify(FAV));localStorage.setItem('sb_cus',JSON.stringify(CUS))}catch(e){}}
+function guess(n){n=n.toLowerCase();var m=[['morph','Morphs'],['admin','Admin'],['hub','Hubs'],['map','Maps'],['gun','Weapons'],['sword','Weapons'],['anti','Protection'],['dex','Tools'],['glitch','Glitchers'],['boss','Bosses']];for(var i=0;i<m.length;i++)if(n.indexOf(m[i][0])>=0)return m[i][1];return 'Imported'}
+function doImport(){
+ var seen={},add=0,un=uname();S.forEach(function(s){seen[s[0]]=1});
+ document.getElementById('imp').value.split(/\r?\n/).forEach(function(l){
+  l=l.trim();var name='',c=l,cat;
+  var d=l.match(/^(\d{5,})\s*(?:--|-)?\s*(.*)$/);
+  if(d){c=d[1];name=d[2]||('Asset '+d[1]);cat='Audio'}
+  else if(/^require\s*\(/i.test(l)){
+   var m=l.match(/\s(?:--|-)\s*(.+)$/);if(m){name=m[1].trim();c=l.slice(0,m.index).trim()}
+   c=c.replace(/(["'])([^"']*)\1/g,function(x,q,v){return(/user|name|urname|victim/i.test(v)||v===un)?q+'{u}'+q:x});
+   name=name||('Imported '+(S.length+1));cat=guess(name)
+  } else return;
+  if(seen[c])return;seen[c]=1;var e=[c,name,cat,1];S.push(e);CUS.push(e);add++
+ });
+ saveS();document.getElementById('impmsg').textContent=add+' new script'+(add===1?'':'s')+' added';render()
+}
+function doExport(){document.getElementById('imp').value=CUS.map(function(c){return c[0].split('{u}').join(uname())+' -- '+c[1]}).join('\n')}
+function doClear(){S=S.filter(function(s){return !s[3]});CUS=[];saveS();document.getElementById('impmsg').textContent='Imported scripts cleared';render()}
+document.addEventListener('click',function(e){var s=e.target.closest('.star');if(s){var k=S[s.dataset.i][0];if(FAV[k])delete FAV[k];else FAV[k]=1;saveS();render()}});
+document.getElementById('sort').addEventListener('change',render);
+var DB=null,USERS={},SES=null,gm='in';
+function el(i){return document.getElementById(i)}
+function pulse(){document.querySelectorAll('.grid').forEach(function(g){g.classList.add('anim');setTimeout(function(){g.classList.remove('anim')},800)})}
+function toast(m){var t=el('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},3500)}
+function tos(f){el('tosm').classList.toggle('hide',!f)}
+try{USERS=JSON.parse(localStorage.getItem('sb_users')||'{}')||{};SES=localStorage.getItem('sb_ses');if(SES&&!USERS[SES])SES=null}catch(e){}
+function b64(a){return btoa(String.fromCharCode.apply(null,new Uint8Array(a)))}
+function unb64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0)})}
+async function hashPw(pw,salt){var k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);return b64(await crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:150000,hash:'SHA-256'},k,256))}
+function applyGate(){document.body.classList.toggle('locked',!SES);el('gate').classList.toggle('hide',!!SES);var p=el('mepill');p.classList.toggle('hide',!SES);p.textContent=SES?SES.split('@')[0]:''}
+function swMode(){gm=gm==='in'?'up':'in';var u=gm==='up';el('gt').textContent=u?'Create your account':'Welcome back';el('gs').textContent=u?'Sign up with your email to get in.':'Log in to open ScriptBox.';el('gb').textContent=u?'Sign up':'Log in';el('sw').textContent=u?'Log in':'Sign up';el('sq').textContent=u?'Have an account?':'No account?';el('tl').classList.toggle('hide',!u);el('pw').autocomplete=u?'new-password':'current-password';el('ge').textContent=''}
+async function authGo(){
+ var em=el('em').value.trim().toLowerCase(),pw=el('pw').value,err=el('ge');err.textContent='';
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){err.textContent='Enter a valid email.';return}
+ if(!window.crypto||!crypto.subtle){err.textContent='This browser cannot secure passwords.';return}
+ try{
+  if(gm==='up'){
+   if(pw.length<8){err.textContent='Password needs 8+ characters.';return}
+   if(!el('tk').checked){err.textContent='Please accept the Terms of Service.';return}
+   if(USERS[em]){err.textContent='That email already has an account. Log in instead.';return}
+   var salt=crypto.getRandomValues(new Uint8Array(16));USERS[em]={s:b64(salt),h:await hashPw(pw,salt),t:Date.now()}
+  }else{var u=USERS[em];if(!u||(await hashPw(pw,unb64(u.s)))!==u.h){err.textContent='Wrong email or password.';return}}
+  SES=em;localStorage.setItem('sb_users',JSON.stringify(USERS));localStorage.setItem('sb_ses',em);el('pw').value='';applyGate();pulse()
+ }catch(e){err.textContent='Could not save. Is browser storage blocked?'}
+}
+function logout(){SES=null;try{localStorage.removeItem('sb_ses')}catch(e){}applyGate()}
+async function pubGo(){
+ var t=el('pt').value.trim(),c=el('pc').value.trim(),k=el('pk').value.trim()||'Verified';
+ if(!t||!/^require\s*\(/i.test(c)){toast('Enter a title and a require() line');return}
+ if(!DB){toast('Updater database unavailable');return}
+ try{await DB.collection('verified').doc('v'+Date.now()).set({code:c,title:t,cat:k,t:Date.now()});toast('Published to everyone online');el('pt').value='';el('pc').value=''}catch(e){toast('You are not allowed to publish')}
+}
+applyGate();pulse();
+(async function(){
+ if(!window.claude||!claude.use)return;
+ try{
+  var user=await claude.use('user');if(user&&(await user.canEdit()))el('pub').classList.remove('hide');
+  var db=await claude.use('db');
+  if(db){DB=db;var first=true;db.collection('verified').onSnapshot(function(snap){
+   snap.docChanges().forEach(function(ch){if(ch.type!=='added')return;var d=ch.doc.data()||{};if(!d.code||!d.title)return;
+    if(S.some(function(s){return s[0]===String(d.code)}))return;S.push([String(d.code),String(d.title),String(d.cat||'Verified'),1]);
+    if(!first)toast('New verified script: '+d.title)});
+   first=false;render()},function(){})}
+  var room=await claude.use('room');
+  if(room){var up=function(l){var n=l.length,o=el('online');o.classList.toggle('hide',n<2);o.textContent=n+' online'};
+   room.onPeers(function(c){up(c.peers)});await room.presence({on:1});up(room.peers())}
+ }catch(e){}
+})();
+function idsIn(src){var out=[],r=/require\s*\(\s*(?:tonumber\s*\(\s*)?["']?(0x[0-9a-f]+|\d+)["']?/gi,m;while((m=r.exec(src))){var raw=m[1],n=/^0x/i.test(raw)?parseInt(raw,16):parseInt(raw,10);out.push({n:n,raw:raw,ln:src.slice(0,m.index).split('\n').length})}return out}
+var KNOWN=null;
+function known(){if(!KNOWN){KNOWN={};S.forEach(function(s){idsIn(s[0]).forEach(function(x){KNOWN[x.n]=s[1]})})}return KNOWN}
+var FL=[[/loadstring\s*\(/g,'loadstring runs text as code','hi'],[/[gs]etfenv\s*\(/g,'getfenv/setfenv tampers with the script environment, common in obfuscated backdoors','hi'],[/(GetAsync|PostAsync|RequestAsync)\s*\(/g,'HttpService request that sends or fetches remote data','me'],[/string\.(char|reverse)\s*\(/g,'string.char/reverse is often used to hide IDs or code','me'],[/_G\.setPower|SetRank\s*\(/g,'admin rank change','me']];
+function doScan(){
+ var src=document.getElementById('src').value,out=document.getElementById('res');
+ if(!src.trim()){out.innerHTML='<p class=note>Paste some Lua first.</p>';return}
+ var K=known(),h='',hi=0,me=0;
+ idsIn(src).forEach(function(x){var t=K[x.n];if(t)hi++;else me++;h+='<div class="fi '+(t?'hi':'me')+'"><b>Line '+x.ln+'</b> · require('+x.raw+') '+(t?'matches <b>'+esc(t)+'</b> in this catalog, a known backdoor payload':'loads a remote module by ID. Check who owns it before trusting it')+'</div>'});
+ FL.forEach(function(f){var m=src.match(f[0]);if(m){if(f[2]==='hi')hi++;else me++;h+='<div class="fi '+f[2]+'"><b>'+m.length+'×</b> '+esc(f[1])+'</div>'}});
+ var lg=src.split('\n').filter(function(l){return l.length>600}).length;
+ if(lg){me++;h+='<div class="fi me"><b>'+lg+'</b> very long line(s), a typical sign of packed or obfuscated code</div>'}
+ var v=hi?'High risk':me?'Needs review':'Nothing suspicious found';
+ out.innerHTML='<div class="fi '+(hi?'hi':me?'me':'ok')+'"><b>'+v+'</b> · '+hi+' high · '+me+' medium</div>'+h
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function uname(){return document.getElementById('u').value.trim()||'YourName'}
+function code(s){return s[0].split('{u}').join(uname())}
+function card(s,i){return '<div class="card"><span class="tag">'+esc(s[2])+(s[3]?' <span class="new">NEW</span>':'')+'<button class="star'+(FAV[s[0]]?' on':'')+'" data-i="'+i+'" title="Save">★</button></span><h3>'+esc(s[1])+'</h3><code>'+esc(code(s))+'</code><button class="btn" data-i="'+i+'">Copy script</button></div>'}
+function copy(t,b){
+  function done(){b.textContent='Copied ✓';b.classList.add('ok');setTimeout(function(){b.textContent='Copy script';b.classList.remove('ok')},1400)}
+  try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}
+  function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove();done()}
+}
+function render(){
+  var q=document.getElementById('q').value.toLowerCase().trim();
+  var chipsEl=document.getElementById('chips');
+  var cats=['All','★ Saved'];S.forEach(function(s){if(cats.indexOf(s[2])<0&&s[2]!=='Featured')cats.push(s[2])});
+  chipsEl.innerHTML=cats.map(function(c){return '<span class="chip'+(c===cat?' on':'')+'" data-c="'+c+'">'+c+'</span>'}).join('');
+  var out=[],idx=[];
+  S.forEach(function(s,i){
+    if(cat==='★ Saved'){if(!FAV[s[0]])return}else if(cat!=='All'&&s[2]!==cat)return;
+    if(q&&(s[1]+' '+s[2]+' '+s[0]).toLowerCase().indexOf(q)<0)return;
+    idx.push(i);
+  });
+  var sv=document.getElementById('sort').value;if(sv==='az')idx.sort(function(a,b){return S[a][1].localeCompare(S[b][1])});else if(sv==='new')idx.reverse();out=idx.map(function(i){return card(S[i],i)});var searching=q||cat!=='All';
+  var showFeat=cur==='home'&&!searching;
+  document.getElementById('featured-wrap').classList.toggle('hide',!showFeat);
+  document.getElementById('home').classList.toggle('hide',cur!=='home');
+  document.getElementById('featured').innerHTML=[0,1,11,33,50,56].map(function(i){return card(S[i],i)}).join('');
+  var list=cur==='home'&&!searching?out.slice(0,12):out.slice(0,LIM);document.getElementById('more').classList.toggle('hide',cur==='home'&&!searching||list.length>=out.length);
+  document.getElementById('list').innerHTML=list.join('');
+  document.getElementById('all-title').textContent=cur==='home'&&!searching?'Latest scripts':searching?out.length+' result'+(out.length===1?'':'s'):'All scripts';
+  document.getElementById('empty').classList.toggle('hide',out.length>0);
+  document.getElementById('n-home').classList.toggle('on',cur==='home');
+  document.getElementById('n-all').classList.toggle('on',cur==='all');
+  document.getElementById('cnt').textContent=S.length;document.getElementById('ncat').textContent=cats.length-2;
+  
+}
+function go(p){cur=p;render();pulse();window.scrollTo(0,0)}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.btn[data-i]');if(b){copy(code(S[b.dataset.i]),b);return}
+  var c=e.target.closest('.chip');if(c){cat=c.dataset.c;render()}
+});
+document.getElementById('q').addEventListener('input',render);
+document.getElementById('u').addEventListener('input',render);
+render();
+</script>
+</body>
+</html>
